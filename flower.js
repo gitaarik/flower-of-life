@@ -1,36 +1,45 @@
-var rads = 250
-var nodes = 6
-var maxLevel = 5
-var rings = [];
-var moved = false;
-var grow = 1;
+// The distance between the circles
+const rads = 250;
+
+// The amount of circles around each "center"
+const nodes = 6;
+
+// How many levels deep do we keep creating "circles around centers"
+const maxLevel = 5;
+
+// The lower this number, the bigger the circles become when you move down with your mouse
+const mouseYDivider = 2;
+
+let moved = false;
+let rings = [];
+let grow = 3;
 
 function setup() {
 
     colorMode(HSB);
 
     var canvas = createCanvas(windowWidth, windowHeight);
-    var startx = width/2;
-    var starty = height/2;
+    var startx = width / 2;
+    var starty = height / 2;
 
     var addedCoords = []
 
     rings = []
-    rings.push(new Circle(startx,starty,rads));
+    rings.push(new Circle(startx, starty, rads));
 
     function makeRings(x, y, level) {
 
-        level = level | 0
+        level = level | 0;
 
-        for(var i = 0;i < nodes;i++){
+        for(var i = 0; i < nodes; i++) {
 
-            let newX = x + rads/2 * cos(2 * PI * i / nodes);
-            let newY = y + rads/2 * sin(2 * PI * i / nodes);
+            let newX = x + rads / 2 * cos(2 * PI * i / nodes);
+            let newY = y + rads / 2 * sin(2 * PI * i / nodes);
 
-            var coords = newX + ',' + newY
+            var coords = newX + ',' + newY;
 
             if (addedCoords.indexOf(coords) == -1) {
-                rings.push(new Circle(newX,newY,rads));
+                rings.push(new Circle(newX, newY, rads));
                 addedCoords.push(coords)
             }
 
@@ -107,10 +116,10 @@ class Circle {
     draw() {
         let color = 0;
         moved = true;
-        color = map(mouseX,0,width,0,255);
+        color = map(mouseX, 0, width, 0, 255);
         stroke(color, 150, intensity);
         noFill();
-        ellipse(this.x, this.y, mouseY / 2, mouseY / 2);
+        ellipse(this.x, this.y, mouseY / mouseYDivider, mouseY / mouseYDivider);
         moved = false;
     }
 
