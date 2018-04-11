@@ -20,7 +20,7 @@ function setup() {
     colorMode(HSB);
 
     document.addEventListener('dblclick', function() {
-        goFullScreen(canvas.canvas);
+        fullscreen(!fullscreen());
     });
 
 
@@ -53,9 +53,49 @@ function setup() {
     }
 
     const canvas = createCanvas(windowWidth, windowHeight);
+    recreateRings();
+    trip();
+    flip();
+
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    recreateRings();
+}
+
+function draw() {
+
+    background(0, 0, 0, 0.08);
+
+    for(let i = 0; i < rings.length; i++){
+        rings[i].draw();
+    }
+
+}
+
+
+let intensity = 128
+
+function mouseWheel(event) {
+
+    rads -= event.delta
+
+    if (rads < 0) {
+        rads = 0
+    } else if (rads > 500) {
+        rads = 500
+    }
+
+    recreateRings()
+
+}
+
+
+function recreateRings() {
+
     const startx = width / 2;
     const starty = height / 2;
-
     const addedCoords = []
 
     rings = []
@@ -86,39 +126,6 @@ function setup() {
     }
 
     makeRings(startx, starty)
-    trip()
-    flip()
-
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}
-
-function draw() {
-
-    background(0, 0, 0, 0.08);
-
-    for(let i = 0; i < rings.length; i++){
-        rings[i].draw();
-    }
-
-}
-
-
-let intensity = 128
-
-function mouseWheel(event) {
-
-    rads -= event.delta
-
-    if (rads < 0) {
-        rads = 0
-    } else if (rads > 500) {
-        rads = 500
-    }
-
-    setup()
 
 }
 
@@ -162,14 +169,4 @@ function trip() {
 
     setTimeout(trip, 50)
 
-}
-
-function goFullScreen(canvas) {
-    if(canvas.requestFullScreen) {
-        canvas.requestFullScreen();
-    } else if(canvas.webkitRequestFullScreen) {l
-        canvas.webkitRequestFullScreen();
-    } else if(canvas.mozRequestFullScreen) {
-        canvas.mozRequestFullScreen();
-    }
 }
