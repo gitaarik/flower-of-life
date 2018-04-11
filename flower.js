@@ -48,7 +48,7 @@ function setup() {
     }
 
     if (!maxLevel) {
-        maxLevel = Math.round(largestScreenDimention / rads);
+        maxLevel = Math.round(largestScreenDimention / rads) - 1;
         if (maxLevel > 6) maxLevel = 6;
     }
 
