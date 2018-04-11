@@ -1,8 +1,8 @@
-// The distance between the circles
-const rads = 250;
-
 // The amount of circles around each "center"
 const nodes = 6;
+
+// The distance between the circles
+let rads = null;
 
 // How many levels deep do we keep creating "circles around centers"
 // If set to `null`, will automatically be set to fit within the screen
@@ -23,22 +23,33 @@ function setup() {
         goFullScreen(canvas.canvas);
     });
 
-    if (!maxLevel) {
 
-        let biggest;
+    let largestScreenDimention;
 
-        if (windowWidth > windowHeight) {
-            biggest = windowWidth;
+    if (windowWidth > windowHeight) {
+        largestScreenDimention = windowWidth;
+    } else {
+        largestScreenDimention = windowHeight;
+    }
+
+    if (!rads) {
+
+        let dividingFactor;
+
+        if (largestScreenDimention > 1000) {
+            dividingFactor = 7;
         } else {
-            biggest = windowHeight;
+            dividingFactor = 3;
         }
 
-        maxLevel = Math.round(biggest / rads) - 1;
+        rads = Math.round(largestScreenDimention / dividingFactor);
+        console.log('rads', rads);
 
-        if (maxLevel > 6) {
-            maxLevel = 6;
-        }
+    }
 
+    if (!maxLevel) {
+        maxLevel = Math.round(largestScreenDimention / rads) - 1;
+        if (maxLevel > 6) maxLevel = 6;
     }
 
     const canvas = createCanvas(windowWidth, windowHeight);
