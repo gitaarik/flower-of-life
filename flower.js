@@ -37,7 +37,7 @@ function setup() {
         let dividingFactor;
 
         if (largestScreenDimention > 1000) {
-            dividingFactor = 7;
+            dividingFactor = 5;
         } else {
             dividingFactor = 3;
         }
@@ -48,8 +48,8 @@ function setup() {
     }
 
     if (!maxLevel) {
-        maxLevel = Math.round(largestScreenDimention / rads) - 1;
-        if (maxLevel > 6) maxLevel = 6;
+        maxLevel = Math.round(largestScreenDimention / rads);
+        if (maxLevel > 7) maxLevel = 7;
     }
 
     const canvas = createCanvas(windowWidth, windowHeight);
