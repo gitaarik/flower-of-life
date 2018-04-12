@@ -48,8 +48,15 @@ function setup() {
     }
 
     if (!maxLevel) {
+
         maxLevel = Math.round(largestScreenDimention / rads);
+
+        if (largestScreenDimention > 1000) {
+            maxLevel--;
+        }
+
         if (maxLevel > 7) maxLevel = 7;
+
     }
 
     const canvas = createCanvas(windowWidth, windowHeight);
