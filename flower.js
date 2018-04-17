@@ -14,6 +14,7 @@ const mouseYDivider = 2;
 let moved = false;
 let rings = [];
 let grow = 3;
+let colorShiftDirection = 1;
 
 function setup() {
 
@@ -52,9 +53,11 @@ function setup() {
     }
 
     const canvas = createCanvas(windowWidth, windowHeight);
+
     recreateRings();
-    trip();
-    flip();
+    flipGrowDirection();
+    colorShiftFlipper();
+    moveMouseAutomatically();
 
 }
 
@@ -149,23 +152,44 @@ class Circle {
 
 }
 
-function flip() {
-    grow = Math.random() < .5
-    setTimeout(flip, 800)
+function flipGrowDirection() {
+    grow = Math.random() < .5;
+    setTimeout(flipGrowDirection, random(400, 1200));
 }
 
-function trip() {
+function colorShiftFlipper() {
+    colorShiftDirection = random([-1, 1]);
+    setTimeout(colorShiftFlipper, random(400, 1200));
+}
+
+function moveMouseAutomatically() {
 
     if (grow) {
         mouseY += 2
-        mouseX += 30
     } else {
         mouseY -= 2
-        if (mouseX > 0) {
-            mouseX -= 60
-        }
     }
 
-    setTimeout(trip, 50)
+    mouseX += colorShiftDirection * width / 64;
+
+    if (mouseX < 0 || mouseX > width) {
+
+        if (mouseX < 0) {
+            mouseX = 0;
+        } else if (mouseX > width) {
+            mouseX = width;
+        }
+
+        colorShiftDirection = !colorShiftDirection;
+
+    }
+
+    if (mouseY < 0) {
+        mouseY = 0;
+    } else if (mouseY > height) {
+        mouseY = height;
+    }
+
+    setTimeout(moveMouseAutomatically, 50)
 
 }
