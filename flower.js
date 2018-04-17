@@ -1,11 +1,13 @@
 // The amount of circles around each "center"
+// For the flower of life this is 6, but other values can give interesting shapes too
 const nodes = 6;
 
 // The distance between the circles
+// If set to `null`, will be automatically determined based on screen size
 let rads = null;
 
 // How many levels deep do we keep creating "circles around centers"
-// If set to `null`, will automatically be set to fit within the screen
+// If set to `null`, will be automatically determined based on screen size
 let maxLevel = null;
 
 // The lower this number, the bigger the circles become when you move down with your mouse
