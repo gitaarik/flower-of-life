@@ -43,13 +43,11 @@ function setup() {
         }
 
         rads = Math.round(largestScreenDimention / dividingFactor);
-        console.log('rads', rads);
 
     }
 
     if (!maxLevel) {
-        maxLevel = Math.round(largestScreenDimention / rads);
-        if (largestScreenDimention > 1000) maxLevel--;
+        maxLevel = Math.round(largestScreenDimention / rads) - 1;
         if (maxLevel > 7) maxLevel = 7;
     }
 
