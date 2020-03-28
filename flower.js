@@ -1,3 +1,5 @@
+const shape = 'triangle';
+
 // The amount of circles around each "center"
 // For the flower of life this is 6, but other values can give interesting shapes too
 const nodes = 6;
@@ -143,13 +145,38 @@ class Circle {
     }
 
     draw() {
+
         let color = 0;
         moved = true;
         color = map(mouseX, 0, width, 0, 255);
         stroke(color, 150, intensity);
         noFill();
-        ellipse(this.x, this.y, mouseY / mouseYDivider, mouseY / mouseYDivider);
+
+        let size = mouseY / mouseYDivider;
+        let halfSize = size / 2;
+
+        let x = this.x;
+        let y = this.y;
+
+        if (shape === 'circle') {
+            circle(x, y, size);
+        }
+        else if (shape === 'square') {
+            square(x - halfSize, y - halfSize, size);
+        }
+        else if (shape == 'triangle') {
+            size = size * 2;
+            halfSize = size / 2;
+            triangle(
+                x, y - halfSize,
+                x - halfSize, y + halfSize,
+                x + halfSize, y + halfSize
+            );
+            rotate(5);
+        }
+
         moved = false;
+
     }
 
 }
