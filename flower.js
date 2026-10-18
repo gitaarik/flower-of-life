@@ -13,10 +13,12 @@ let maxLevel = null;
 // The lower this number, the bigger the circles become when you move down with your mouse
 const mouseYDivider = 2;
 
-let moved = false;
 let rings = [];
 let grow = 3;
 let colorShiftDirection = 1;
+let lastPointerMove = 0;
+let lastStep = 0;
+let lastDraw = 0;
 
 function setup() {
 
@@ -25,6 +27,13 @@ function setup() {
     document.addEventListener('dblclick', function() {
         fullscreen(!fullscreen());
     });
+
+    const pointerMoved = function() {
+        lastPointerMove = millis();
+    };
+
+    document.addEventListener('mousemove', pointerMoved);
+    document.addEventListener('touchmove', pointerMoved);
 
 
     let largestScreenDimention;
@@ -56,10 +65,12 @@ function setup() {
 
     const canvas = createCanvas(windowWidth, windowHeight);
 
+    // 1px lines, plus half a physical pixel to give them a bit more body
+    strokeWeight(1 + 0.5 / pixelDensity());
+
     recreateRings();
     flipGrowDirection();
     colorShiftFlipper();
-    moveMouseAutomatically();
 
 }
 
@@ -70,11 +81,39 @@ function windowResized() {
 
 function draw() {
 
-    background(0, 0, 0, 0.08);
+    const now = millis();
 
-    for(let i = 0; i < rings.length; i++){
-        rings[i].draw();
+    // The automatic movement only changes the picture every 50ms, so 20 frames
+    // per second is enough. While the mouse (or a finger) moves, draw at full
+    // speed so its trails stay smooth.
+    frameRate(now - lastPointerMove < 1000 ? 60 : 20);
+
+    // A step every 50ms, with some slack because frames never arrive exactly on time
+    if (now - lastStep >= 45) {
+        moveMouseAutomatically();
+        lastStep = now;
     }
+
+    // Fade out what was drawn before by 8% for every 60th of a second that
+    // passed, so the trails fade at the same speed at any frame rate
+    const fades = constrain(Math.round((now - lastDraw) / (1000 / 60)), 1, 3);
+    lastDraw = now;
+
+    for (let i = 0; i < fades; i++) {
+        background(0, 0, 0, 0.08);
+    }
+
+    // All circles have the same color and size, so they're drawn as one path
+    const radius = Math.abs(mouseY / mouseYDivider) / 2;
+
+    stroke(map(mouseX, 0, width, 0, 255), 150, intensity);
+    drawingContext.beginPath();
+
+    for (let i = 0; i < rings.length; i++) {
+        rings[i].addToPath(radius);
+    }
+
+    drawingContext.stroke();
 
 }
 
@@ -100,36 +139,54 @@ function recreateRings() {
 
     const startx = width / 2;
     const starty = height / 2;
-    const addedCoords = []
 
-    rings = []
-    rings.push(new Circle(startx, starty, rads));
+    // Different paths lead to the same spot with slightly different floating
+    // point coordinates, so spots are compared by their rounded coordinates
+    const addedCoords = new Set();
 
-    function makeRings(x, y, level) {
+    rings = [];
 
-        level = level | 0;
+    function addRing(x, y) {
 
-        for(let i = 0; i < nodes; i++) {
+        const coords = Math.round(x * 100) + ',' + Math.round(y * 100);
 
-            let newX = x + rads / 2 * cos(2 * PI * i / nodes);
-            let newY = y + rads / 2 * sin(2 * PI * i / nodes);
-
-            let coords = newX + ',' + newY;
-
-            if (addedCoords.indexOf(coords) == -1) {
-                rings.push(new Circle(newX, newY, rads));
-                addedCoords.push(coords)
-            }
-
-            if (level < maxLevel) {
-                makeRings(newX, newY, level + 1)
-            }
-
+        if (addedCoords.has(coords)) {
+            return false;
         }
+
+        addedCoords.add(coords);
+        rings.push(new Circle(x, y, rads));
+
+        return true;
 
     }
 
-    makeRings(startx, starty)
+    addRing(startx, starty);
+
+    // Work outwards level by level, only continuing from circles that weren't
+    // there yet
+    let centers = [[startx, starty]];
+
+    for (let level = 0; level <= maxLevel; level++) {
+
+        const newCenters = [];
+
+        for (const [x, y] of centers) {
+            for (let i = 0; i < nodes; i++) {
+
+                const newX = x + rads / 2 * cos(2 * PI * i / nodes);
+                const newY = y + rads / 2 * sin(2 * PI * i / nodes);
+
+                if (addRing(newX, newY)) {
+                    newCenters.push([newX, newY]);
+                }
+
+            }
+        }
+
+        centers = newCenters;
+
+    }
 
 }
 
@@ -142,14 +199,9 @@ class Circle {
         this.r = r;
     }
 
-    draw() {
-        let color = 0;
-        moved = true;
-        color = map(mouseX, 0, width, 0, 255);
-        stroke(color, 150, intensity);
-        noFill();
-        ellipse(this.x, this.y, mouseY / mouseYDivider, mouseY / mouseYDivider);
-        moved = false;
+    addToPath(radius) {
+        drawingContext.moveTo(this.x + radius, this.y);
+        drawingContext.arc(this.x, this.y, radius, 0, TWO_PI);
     }
 
 }
@@ -191,7 +243,5 @@ function moveMouseAutomatically() {
     } else if (mouseY > height) {
         mouseY = height;
     }
-
-    setTimeout(moveMouseAutomatically, 50)
 
 }
