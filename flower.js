@@ -19,6 +19,7 @@ let colorShiftDirection = 1;
 let lastPointerMove = 0;
 let lastStep = 0;
 let lastDraw = 0;
+let lineOffsets = [0];
 
 function setup() {
 
@@ -65,8 +66,18 @@ function setup() {
 
     const canvas = createCanvas(windowWidth, windowHeight);
 
-    // 1px lines, plus half a physical pixel to give them a bit more body
-    strokeWeight(1 + 0.5 / pixelDensity());
+    // Render at the screen's real resolution (p5 rounds it up, e.g. 1.25 to 2)
+    pixelDensity(displayDensity());
+
+    // The lines are a bit bolder than 1px. On screens with one physical pixel
+    // per pixel that's done with two 1px lines next to each other, because
+    // those are drawn much faster than one thicker line.
+    if (pixelDensity() === 1) {
+        strokeWeight(1);
+        lineOffsets = [-0.25, 0.25];
+    } else {
+        strokeWeight(1 + 0.5 / pixelDensity());
+    }
 
     recreateRings();
     flipGrowDirection();
@@ -107,13 +118,18 @@ function draw() {
     const radius = Math.abs(mouseY / mouseYDivider) / 2;
 
     stroke(map(mouseX, 0, width, 0, 255), 150, intensity);
-    drawingContext.beginPath();
 
-    for (let i = 0; i < rings.length; i++) {
-        rings[i].addToPath(radius);
+    for (const offset of lineOffsets) {
+
+        drawingContext.beginPath();
+
+        for (let i = 0; i < rings.length; i++) {
+            rings[i].addToPath(Math.max(radius + offset, 0));
+        }
+
+        drawingContext.stroke();
+
     }
-
-    drawingContext.stroke();
 
 }
 
